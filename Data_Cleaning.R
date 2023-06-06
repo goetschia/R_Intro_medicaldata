@@ -12,4 +12,5 @@ dat <- dat %>% mutate(alcohol = if_else(alcohol == "0-39g/day", "0-39", alcohol)
 
 dat_overview <- dat %>% summarise(cases = sum(cases), controls = sum(controls)) %>% pivot_longer(c(cases,controls))
 
+
 rm(esoph_ca)
