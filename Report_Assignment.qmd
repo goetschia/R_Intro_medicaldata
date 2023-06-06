@@ -1,0 +1,83 @@
+---
+title: "Esophageal cancer"
+author: "Aljoscha Goetschi"
+date: "`r date()`"
+format: 
+  html:
+      toc: true
+      code-fold: show
+      code-tools: true
+      df-print: paged
+      embed-resources: true
+---
+```{r}
+#| output: false
+source("Data_Plotting.R")
+library(lubridate)
+```
+
+## Introduction
+In this assignment for the Public Health Science course "Basic Statistics and Introduction to R", I analysed a publicly available data set of a case-control study on the association of esophagal cancer with alcohol and tobacco. I provide descriptive statistics and relevant plots.
+
+## Data
+
+I first loaded the data set, changed the variable names and modified the factor structure. 
+```{r}
+data("esoph_ca")
+
+dat <- esoph_ca
+names(dat) <- c("age", "alcohol", "smoker", "cases", "controls")
+dat <- dat %>% mutate(alcohol = if_else(alcohol == "0-39g/day", "0-39", alcohol),
+                      alcohol = factor(alcohol, levels = c("0-39", "40-79", "80-119", "120+")),
+                      smoker = if_else(smoker == "0-9g/day", "0-9", smoker))
+dat
+```
+To facilitate the graphical representation of how many cases and controls figure in the data set, I created a new dataframe.
+
+```{r}
+dat_overview <- dat %>% summarise(cases = sum(cases), controls = sum(controls)) %>% pivot_longer(c(cases,controls))
+dat_overview
+```
+
+## Plots
+In figure 1, I show the distribution of cases versus controls.
+
+```{r}
+#| label: fig-cases
+#| fig-cap: "Total number of cases and controls"
+#| fig-width: 8
+#| fig-height: 4
+ggplot(dat_overview, aes(x = name, y = value)) + geom_col() +
+  xlab(label = "") + ylab(label = "Number of patients") + theme_bw()
+```
+
+The occurence of esophagal carcinoma versus tobacco and alcohol consumption, and age groups are shown in figure 2. 
+
+```{r}
+#| label: fig-chung
+#| fig-cap: "V1 and V2 compare tobacco consumption between cases and controls. V3 and V4 display the distribution of alcohol consumption between cases and controls. In V5 and V6 cases and controles are stratified in age groups."
+#| fig-width: 8
+#| fig-height: 8
+p_hist_smoke_case <- ggplot(dat, aes(x = smoker, y = cases)) + geom_col() + xlab(label = "Tobacco consumption [g/day]") +
+  ylab("Number of cases") + theme_bw()
+
+p_hist_smoke_control <- ggplot(dat, aes(x = smoker, y = controls)) + geom_col() + xlab(label = "Tobacco consumption [g/day]") +
+  ylab("Number of controls") + theme_bw()
+
+p_hist_alc_case <- ggplot(dat, aes(x = alcohol, y = cases)) + geom_col() + xlab(label = "Alcohol consumption [g/day]") +
+  ylab("Number of cases") + theme_bw()
+
+p_hist_alc_control <- ggplot(dat, aes(x = alcohol, y = controls)) + geom_col() + xlab(label = "Alcohol consumption [g/day]") +
+  ylab("Number of controls") + theme_bw()
+
+p_hist_age_case <- ggplot(dat, aes(x = age, y = cases)) + geom_col() + xlab(label = "Age groups [years]") +
+  ylab("Number of cases") + theme_bw()
+
+p_hist_age_control <- ggplot(dat, aes(x = age, y = controls)) + geom_col() + xlab(label = "Age groups [years]") +
+  ylab("Number of cases") + theme_bw()
+
+plot_grid(plotlist = list(p_hist_smoke_case, p_hist_smoke_control, p_hist_alc_case, p_hist_alc_control, p_hist_age_case, p_hist_age_control), 
+                         labels = c("V1", "V2", "V3", "V4", "V5", "V6"), label_size = 10, nrow = 3, hjust = -0.25, vjust = 1)
+
+```
+
